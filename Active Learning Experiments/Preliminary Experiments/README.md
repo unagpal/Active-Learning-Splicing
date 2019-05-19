@@ -1,2 +1,4 @@
-traintestsplit.py stores permutations of all data indices in .npy files, in order to standardize the initial dataset across active learning models.
+**Code Functionality, by File**
+
+* traintestsplit.py stores permutations of all data indices in .npy files, in order to standardize the initial dataset across active learning models.
 
