@@ -6,4 +6,4 @@
 
 * CNP_MLP_AL_Comparison.ipynb shows the results of preliminary active learning experiments in 5' splicing prediction using CNPs with MLP encoders.
 
-* BayesAL_SD1SD2.py runs active learning experiments on CNNs (using dropout as an approximation for model uncertainty in acquisition functions).
+* Bayesian_AL.ipynb runs active learning experiments on CNNs (using dropout as an approximation for model uncertainty in acquisition functions).
