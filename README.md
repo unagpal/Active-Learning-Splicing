@@ -1,1 +1,1 @@
-# Active Learning Research 2019
+# Active Learning via Expected Improvement Maximization
