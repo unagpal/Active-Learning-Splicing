@@ -1,0 +1,202 @@
+Here we run hypothesis tests using linear mixed models (LMMs) in order to assess whether differences in active learning performance between EI and alternative acquisition functions in our classification experiments are statistically significant.
+
+Load MNIST binary batch size 1 data:
+```{r}
+library(readxl)
+require(openxlsx)
+require(tidyverse)
+#dat = read_excel("CNN_AL_Performance.xlsx")
+dat = read.xlsx("CNN_AL_Performance.xlsx", 4)
+dat %>% rename(iteration = X1)
+```
+
+Convert to tidy format and plot
+```{r}
+tidydat = dat %>% rename(iteration = X1) %>% 
+  gather(experiment, acc, -iteration) %>%
+  separate(experiment, c("method","metric","dat","rep"), sep= "_") %>% 
+  select(-metric, -dat)
+
+tidydat %>% ggplot(aes(iteration, acc, col = method)) + geom_point(alpha=0.3)
+```
+
+Fit mixed model and obtain p-value for EI vs MaxEnt: 
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","MaxEnt")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+A negative fixed effect term in the alternative model suggests better performance (higher accuracy) by EI than MaxEnt.
+Fit mixed model and obtain p-value for EI vs Rand: 
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","Rand")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Similar story here. Next comparing EI to BALD:
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","BALD")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Note: the above shows EI outperforming BALD as can be seen through the positive fixed effect of EI.
+Next comparing EI to Coreset:
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","Coreset")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Note: the above shows EI outperforming Coreset as can be seen through the positive fixed effect of EI.
+
+Load MNIST binary batch size 25 data:
+```{r}
+library(readxl)
+require(openxlsx)
+require(tidyverse)
+#dat = read_excel("CNN_AL_Performance.xlsx")
+dat = read.xlsx("CNN_AL_Performance.xlsx", 5)
+dat %>% rename(iteration = X1)
+```
+Convert to tidy format and plot
+```{r}
+tidydat = dat %>% rename(iteration = X1) %>% 
+  gather(experiment, acc, -iteration) %>%
+  separate(experiment, c("method","metric","dat","rep"), sep= "_") %>% 
+  select(-metric, -dat)
+
+tidydat %>% ggplot(aes(iteration, acc, col = method)) + geom_point(alpha=0.3)
+```
+Fit mixed model and obtain p-value for EI vs MaxEnt: 
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","MaxEnt")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Fit mixed model and obtain p-value for EI vs Rand: 
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","Rand")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Next comparing EI to BatchBALD:
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","BatchBALD")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+
+Comparing EI vs. Coreset:
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","Coreset")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Lastly, comparing EI to alternative methods for MNIST multi-class with batch size 100:
+
+```{r}
+library(readxl)
+require(openxlsx)
+require(tidyverse)
+#dat = read_excel("CNN_AL_Performance.xlsx")
+dat = read.xlsx("CNN_AL_Performance.xlsx", 6)
+dat %>% rename(iteration = X1)
+```
+
+Convert to tidy format and plot
+```{r}
+tidydat = dat %>% rename(iteration = X1) %>% 
+  gather(experiment, acc, -iteration) %>%
+  separate(experiment, c("method","metric","dat","rep"), sep= "_") %>% 
+  select(-metric, -dat)
+
+tidydat %>% ggplot(aes(iteration, acc, col = method)) + geom_point(alpha=0.3)
+```
+
+Fit mixed model and obtain p-value for EI vs MaxEnt: 
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","MaxEnt")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+
+Fit mixed model and obtain p-value for EI vs Rand: 
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","Rand")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+
+Next comparing EI to BatchBALD (EI is actually slightly but not significantly outperformed by BatchBald here):
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","BatchBALD")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+
+Comparing EI vs. Coreset:
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","Coreset")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( acc ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( acc ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+EI is outperformed by Coreset here but not significantly.

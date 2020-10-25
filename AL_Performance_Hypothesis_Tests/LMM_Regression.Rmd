@@ -1,0 +1,124 @@
+Here we run hypothesis tests using linear mixed models (LMMs) in order to assess whether differences in active learning performance between EI and alternative acquisition functions in our regression experiments are statistically significant.
+
+Load splicing data
+```{r}
+library(readxl)
+require(openxlsx)
+require(tidyverse)
+#dat = read_excel("CNN_AL_Performance.xlsx")
+dat = read.xlsx("CNN_AL_Performance.xlsx", 1)
+dat %>% rename(iteration = X1)
+```
+
+Convert to tidy format and plot
+```{r}
+tidydat = dat %>% rename(iteration = X1) %>% 
+  gather(experiment, mse, -iteration) %>%
+  separate(experiment, c("method","metric","dat","rep"), sep= "_") %>% 
+  select(-metric, -dat)
+
+tidydat %>% ggplot(aes(iteration, mse, col = method)) + geom_point(alpha=0.3)
+```
+
+Fit mixed model for EI vs MaxVar: 
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","MaxVar")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( mse ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+```
+The fixed effect term in the alternative model being positive (0.008997) is saying the MSE is typically higher for MaxVar.
+
+To test whether that effect is statistically significant we use `anova` (which will do a likelihood ratio test):
+```{r}
+null_model = lme4::lmer( mse ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+```
+The p-value here is highly significant (< 2.2e-16). We can get the actual p-value: 
+```{r}
+anova_lmm$`Pr(>Chisq)`[2]
+```
+
+Same steps for EI vs Rand: 
+```{r}
+filt_dat = tidydat %>% filter(method %in% c("EI","Rand")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( mse ~ method + (1|iteration), filt_dat, REML = F )
+null_model = lme4::lmer( mse ~ (1|iteration), filt_dat, REML = F  )
+alt_model
+anova_lmm = anova(alt_model, null_model)
+anova_lmm$`Pr(>Chisq)`[2]
+```
+
+Still very significant, although less so (as can be inferred from the plot).
+
+Next, running LMM for UTKFace RMSE (batch size 100):
+```{r}
+dat = read.xlsx("CNN_AL_Performance.xlsx", 2)
+dat %>% rename(iteration = X1)
+```
+
+Convert to tidy format and plot:
+```{r}
+tidydat = dat %>% rename(iteration = X1) %>% 
+  gather(experiment, rmse, -iteration) %>%
+  separate(experiment, c("method","metric","dat","rep"), sep= "_") %>% 
+  select(-metric, -dat)
+
+tidydat %>% ggplot(aes(iteration, rmse, col = method)) + geom_point(alpha=0.3)
+```
+Fit mixed model and obtain p-value for EI vs. MaxVar:
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","MaxVar")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( rmse ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( rmse ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+
+```
+Fit mixed model and obtain p-value for EI vs. Rand:
+
+```{r}
+filt_dat = tidydat %>% filter(method %in% c("EI","Rand")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( rmse ~ method + (1|iteration), filt_dat, REML = F )
+null_model = lme4::lmer( rmse ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Next, running LMM for UTKFace RMSE (batch size 200):
+```{r}
+dat = read.xlsx("CNN_AL_Performance.xlsx", 3)
+dat %>% rename(iteration = X1)
+```
+Convert to tidy format and plot:
+```{r}
+tidydat = dat %>% rename(iteration = X1) %>% 
+  gather(experiment, rmse, -iteration) %>%
+  separate(experiment, c("method","metric","dat","rep"), sep= "_") %>% 
+  select(-metric, -dat)
+
+tidydat %>% ggplot(aes(iteration, rmse, col = method)) + geom_point(alpha=0.3)
+```
+Running mixed model and obtaining p-value for EI vs. MaxVar:
+```{r}
+require(lme4)
+filt_dat = tidydat %>% filter(method %in% c("EI","MaxVar")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( rmse ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( rmse ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm
+anova_lmm$`Pr(>Chisq)`[2]
+```
+Running mixed model and obtaining p-value for EI vs. Rand:
+```{r}
+filt_dat = tidydat %>% filter(method %in% c("EI","Rand")) %>% mutate(iteration = as.factor(iteration))
+alt_model = lme4::lmer( rmse ~ method + (1|iteration), filt_dat, REML = F )
+alt_model
+null_model = lme4::lmer( rmse ~ (1|iteration), filt_dat, REML = F  )
+anova_lmm = anova(alt_model, null_model)
+anova_lmm$`Pr(>Chisq)`[2]
+```
